@@ -30,8 +30,6 @@ public class Snowflake {
         NUM_SNOWFLAKE_TYPES = index;
     }
 
-
-
     private static final double FALL_SPEED = 100;
 
     private static final double MAX_ANGLE_DELTA = Math.PI / 16;
@@ -43,7 +41,7 @@ public class Snowflake {
     /**
      * Snowflake position
      * x,y are screen coordinates
-     * z is draw depth (higher values)
+     * z is draw depth (higher values are displayed on top)
      */
     private Point3D position;
 
