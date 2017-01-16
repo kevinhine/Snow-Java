@@ -15,6 +15,11 @@ public class GUI {
     private static final int MIN_SNOWFALL = 0,
                              MAX_SNOWFALL = 100;
 
+    private static final int HOLD_DELAY = 500,
+                             SPAWN_DELAY = 60;
+
+    private static final double RANGE_TO_PERCENT = 0.01;
+
     private JFrame mainWindow;
     private JPanel topPanel;
 
@@ -63,12 +68,15 @@ public class GUI {
         mainWindow.pack();
     }
 
+    /**
+     * Enable Interactivity
+     */
     private void registerListeners() {
         snowfallSlider.addChangeListener((ChangeEvent e) -> {
-            double percent = ((JSlider)e.getSource()).getValue() / 100.0;
+            double percent = ((JSlider)e.getSource()).getValue() * RANGE_TO_PERCENT;
             canvas.adjustSnowfall(percent);
         });
-        CanvasMouseListener c = new  CanvasMouseListener();
+        CanvasMouseListener c = new CanvasMouseListener();
         canvas.addMouseListener(c);
         canvas.addMouseMotionListener(c);
         canvas.addMouseWheelListener(c);
@@ -83,9 +91,13 @@ public class GUI {
         Timer spawningTimer;
         Timer delayTimer;
 
+        /**
+         * Create a Mouse Listener for the Canvas
+         */
         public CanvasMouseListener() {
-            delayTimer = new Timer(500, ae -> spawningTimer.start());
+            delayTimer = new Timer(HOLD_DELAY, ae -> spawningTimer.start());
             delayTimer.setRepeats(false);
+            spawningTimer = new Timer(SPAWN_DELAY, ae -> canvas.spawnSnowflake(spawningPos));
         }
 
         /**
@@ -105,9 +117,7 @@ public class GUI {
          */
         @Override
         public void mousePressed(MouseEvent e) {
-            //calculate circle around point
             spawningPos = e.getPoint();
-            spawningTimer = new Timer(60, ae -> canvas.spawnSnowflake(spawningPos));
             delayTimer.start();
         }
 
