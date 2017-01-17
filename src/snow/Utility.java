@@ -28,7 +28,7 @@ public class Utility {
      * @return interpolation
      */
     public static int lerp(int a, int b, double percent) {
-        return (int)(a * (1 - percent) + b * percent);
+        return (int)lerp((double)a, (double)b, percent);
     }
 
     /**
@@ -70,8 +70,8 @@ public class Utility {
      */
     public static void colorize(BufferedImage img, Color c) {
         int blendColor = c.getRGB();
-        for(int y = 0; y < img.getWidth(); y ++) {
-            for(int x = 0; x < img.getHeight(); x++) {
+        for(int y = 0; y < img.getHeight(); y++) {
+            for(int x = 0; x < img.getWidth(); x++) {
                 //Read Pixel
                 int color = img.getRGB(x, y);
                 int alpha = (color & 0xff000000) >> 24;
@@ -90,8 +90,8 @@ public class Utility {
      * @param percent bounded 0,1
      */
     public static void fade(BufferedImage img, double percent) {
-        for(int y = 0; y < img.getWidth(); y ++) {
-            for(int x = 0; x < img.getHeight(); x++) {
+        for(int y = 0; y < img.getHeight(); y++) {
+            for(int x = 0; x < img.getWidth(); x++) {
                 //Read Pixel
                 int color = img.getRGB(x, y);
                 int alpha = (color & 0xff000000) >>> 24;
