@@ -11,84 +11,33 @@ import javax.swing.*;
  * @author Kevin
  */
 public class DisplayCanvas extends JPanel{
-    public static final int FRAME_RATE = 60, //frames per second
-                            FRAME_DELAY = 1000 / FRAME_RATE; //frame duration in ms
-
-    public static final double FRAME_DELTA_TIME = 1.0 / FRAME_RATE; //frame frequency in seconds per frame
-
-    private static final int MIN_SPAWN_DELAY = FRAME_RATE / 2,
-                             MAX_SPAWN_DELAY = FRAME_RATE * 5;
-
+    private static final int BORDER = 15;
     private static final double EPSILON = 0.000001;
 
-    private static final int BORDER = 15;
+    public static final int FRAME_RATE = 60; //frames per second
+    public static final int FRAME_DELAY = 1000 / FRAME_RATE; //frame duration in ms
+    public static final double FRAME_DELTA_TIME = 1.0 / FRAME_RATE; //frame frequency in seconds per frame
+
+    private static final int MAX_SPAWN_DELAY = FRAME_RATE * 5, MIN_SPAWN_DELAY = FRAME_RATE / 2;
 
     private final Dimension preferredSize;
-    private final GUI gui;
-    private final ArrayList<Snowflake> snowflakes = new ArrayList<>();
 
     private final Timer snowSpawnTimer;
     private final Timer snowTickTimer;
 
     private double snowfallPercent = 0;
+    private final ArrayList<Snowflake> snowflakes = new ArrayList<>();
 
     /**
      * Create a Display Canvas
-     * @param gui
-     * @param d
+     * @param d optimal canvas size
      */
-    public DisplayCanvas(GUI gui, Dimension d) {
-        this.gui = gui;
+    public DisplayCanvas(Dimension d) {
         preferredSize = d;
         snowTickTimer = new Timer(FRAME_DELAY, ae -> {snowTick(); repaint();} );
         snowSpawnTimer = new Timer(FRAME_DELAY, ae -> spawnSnowflake());
         snowTickTimer.start();
         initialize();
-    }
-
-    /**
-     * Avoid Overloadable calls in the constructor
-     */
-    private void initialize() {
-        setBackground(Color.BLACK);
-        this.addComponentListener(new resizeListener());
-    }
-
-    /**
-     * Update the snowflake positions
-     */
-    private void snowTick() {
-        for(int i = snowflakes.size() - 1; i >= 0; i--) {
-            Snowflake s = snowflakes.get(i);
-            Point3D pos = s.fall();
-            if(pos.getY() > getHeight() || pos.getX() < -BORDER || pos.getX() > getWidth() + BORDER) {
-                snowflakes.remove(s);
-            }
-        }
-    }
-
-    /**
-     * Instantiate a snowflake
-     * @param xPos
-     * @param yPos
-     */
-    public void spawnSnowflake(double xPos, double yPos) {
-        snowflakes.add(new Snowflake(xPos, yPos));
-    }
-
-    /**
-     * Instantiate a snowflake
-     * @param pos snowflake spawn position
-     */
-    public void spawnSnowflake(Point pos) {
-        spawnSnowflake(pos.x, pos.y);
-    }
-
-    /**
-     * Instantiate a snowflake at the top of the screen
-     */
-    public void spawnSnowflake() {
-        spawnSnowflake(Math.random() * getWidth() + 1, - 20);
     }
 
     /**
@@ -128,6 +77,14 @@ public class DisplayCanvas extends JPanel{
     }
 
     /**
+     * Avoid Overloadable calls in the constructor
+     */
+    private void initialize() {
+        setBackground(Color.BLACK);
+        this.addComponentListener(new resizeListener());
+    }
+    
+    /**
      * Render Snowflakes
      * @param g graphics context
      */
@@ -143,6 +100,43 @@ public class DisplayCanvas extends JPanel{
 //        g.fillRect(10, 8, 120, 16);
 //        g.setColor(Color.WHITE);
 //        g.drawString("Snowflakes: " + snowflakes.size(), 12, 20);
+    }
+
+    /**
+     * Update the snowflake positions
+     */
+    private void snowTick() {
+        for(int i = snowflakes.size() - 1; i >= 0; i--) {
+            Snowflake s = snowflakes.get(i);
+            Point3D pos = s.fall();
+            if(pos.getY() > getHeight() || pos.getX() < -BORDER || pos.getX() > getWidth() + BORDER) {
+                snowflakes.remove(s);
+            }
+        }
+    }
+
+    /**
+     * Instantiate a snowflake
+     * @param xPos
+     * @param yPos
+     */
+    public void spawnSnowflake(double xPos, double yPos) {
+        snowflakes.add(new Snowflake(xPos, yPos));
+    }
+
+    /**
+     * Instantiate a snowflake
+     * @param pos snowflake spawn position
+     */
+    public void spawnSnowflake(Point pos) {
+        spawnSnowflake(pos.x, pos.y);
+    }
+
+    /**
+     * Instantiate a snowflake at the top of the screen
+     */
+    public void spawnSnowflake() {
+        spawnSnowflake(Math.random() * getWidth() + 1, - 20);
     }
 
     /**
