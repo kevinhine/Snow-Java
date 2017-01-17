@@ -16,6 +16,14 @@ import javax.imageio.ImageIO;
  * @author Kevin Hine
  */
 public class Snowflake {
+    private static final double FALL_SPEED = 100;
+
+    private static final double DRIFT_SPEED = FALL_SPEED / 4;
+    private static final double MAX_ANGLE_DELTA = Math.PI / 16;
+
+    private static final double MAX_SPEED_MODIFIER = 1;
+    private static final double MIN_SPEED_MODIFIER = 0.4;
+
     private static final int NUM_SNOWFLAKE_TYPES;
 
     /**
@@ -30,13 +38,8 @@ public class Snowflake {
         NUM_SNOWFLAKE_TYPES = index;
     }
 
-    private static final double FALL_SPEED = 100;
-
-    private static final double MAX_ANGLE_DELTA = Math.PI / 16;
-    private static final double DRIFT_SPEED = FALL_SPEED / 4;
-
-    private static final double MIN_SPEED_MODIFIER = 0.4,
-                                MAX_SPEED_MODIFIER = 1;
+    //Used as a Vector that affects the Falling Trajectory
+    private double driftAngle = Math.random() * Math.PI * 2;
 
     /**
      * Snowflake position
@@ -44,13 +47,9 @@ public class Snowflake {
      * z is draw depth (higher values are displayed on top)
      */
     private Point3D position;
-
-    //Used as a Vector that affects the Falling Trajectory
-    private double driftAngle = Math.random() * Math.PI * 2;
+    private BufferedImage texture;
     private double xDrift;
     private double yDrift;
-
-    private BufferedImage texture;
 
     //Scale based on depth?
 //    private static final int MAX_SIZE = 20;
@@ -70,18 +69,6 @@ public class Snowflake {
     }
 
     /**
-     * Choose a snowflake texture
-     */
-    private void loadTexture() {
-        int index = (int)(Math.random() * NUM_SNOWFLAKE_TYPES);
-        try {
-            texture = ImageIO.read(getClass().getResource("resources/snowflake" + index + ".png"));
-        } catch(IOException e) {
-            System.err.println(e); //Should not throw any errors as files are initially checked
-        }
-    }
-
-    /**
      * Colorize the snowflake texture
      */
     private void UpdateTexture() {
@@ -90,15 +77,7 @@ public class Snowflake {
         Color tint = new Color(142, 230, 255, alpha);
         Utility.colorize(texture, tint);
         //Depth
-        Utility.fade(texture, 1-position.getZ()); //0 is far away, 1 is close
-    }
-
-    /**
-     * Render the Snowflake
-     * @param g
-     */
-    public void paint(Graphics g) {
-        g.drawImage(texture, (int)position.getX(), (int)position.getY(), null);
+        Utility.fade(texture, 1 - position.getZ()); //0 is far away, 1 is close
     }
 
     /**
@@ -111,21 +90,6 @@ public class Snowflake {
         xDrift = DRIFT_SPEED * Math.cos(driftAngle);
         yDrift = DRIFT_SPEED * Math.sin(driftAngle);
     }
-
-    /**
-     * Cause the snowflake to fall to the ground
-     * @return snowflake location
-     */
-    public Point3D fall() {
-        //Update Position
-        drift();
-        double parallax = Utility.lerp(MIN_SPEED_MODIFIER, MAX_SPEED_MODIFIER, position.getZ()); //0 is far away (slower), 1 is close (faster)
-        Point3D delta = new Point3D(xDrift, FALL_SPEED + yDrift, 0);
-        delta = delta.multiply(parallax * DisplayCanvas.FRAME_DELTA_TIME);
-        position = position.add(delta);
-        return position;
-    }
-
 
     /**
      * Default comparison
@@ -142,6 +106,20 @@ public class Snowflake {
     }
 
     /**
+     * Cause the snowflake to fall to the ground
+     * @return snowflake location
+     */
+    public Point3D fall() {
+        //Update Position
+        drift();
+        double parallax = Utility.lerp(MIN_SPEED_MODIFIER, MAX_SPEED_MODIFIER, position.getZ()); //0 is far away (slower), 1 is close (faster)
+        Point3D delta = new Point3D(xDrift, FALL_SPEED + yDrift, 0);
+        delta = delta.multiply(parallax * DisplayCanvas.FRAME_DELTA_TIME);
+        position = position.add(delta);
+        return position;
+    }
+
+    /**
      * Default hash
      * @return hash
      */
@@ -151,5 +129,25 @@ public class Snowflake {
         hash = 37 * hash + Objects.hashCode(this.position);
         hash = 37 * hash + Objects.hashCode(this.texture);
         return hash;
+    }
+
+    /**
+     * Choose a snowflake texture
+     */
+    private void loadTexture() {
+        int index = (int)(Math.random() * NUM_SNOWFLAKE_TYPES);
+        try {
+            texture = ImageIO.read(getClass().getResource("resources/snowflake" + index + ".png"));
+        } catch(IOException e) {
+            System.err.println(e); //Should not throw any errors as files are initially checked
+        }
+    }
+
+    /**
+     * Render the Snowflake
+     * @param g
+     */
+    public void paint(Graphics g) {
+        g.drawImage(texture, (int)position.getX(), (int)position.getY(), null);
     }
 }
