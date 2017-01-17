@@ -21,8 +21,11 @@ public class Snowflake {
     private static final double DRIFT_SPEED = FALL_SPEED / 4;
     private static final double MAX_ANGLE_DELTA = Math.PI / 16;
 
-    private static final double MAX_SPEED_MODIFIER = 1;
     private static final double MIN_SPEED_MODIFIER = 0.4;
+    private static final double MAX_SPEED_MODIFIER = 1;
+
+    private static final double MAX_MULTIPLIER = 2;
+    private static final double RETURN_RATE = 0.01;
 
     private static final int NUM_SNOWFLAKE_TYPES;
 
@@ -40,6 +43,7 @@ public class Snowflake {
 
     //Used as a Vector that affects the Falling Trajectory
     private double driftAngle = Math.random() * Math.PI * 2;
+    private double strengthMultiplier = 1;
 
     /**
      * Snowflake position
@@ -63,21 +67,9 @@ public class Snowflake {
         //Calculate Depth with placeholder x,y
         position = new Point3D(0, 0, Math.random());
         loadTexture();
-        UpdateTexture();
+        updateTexture();
         //Convert from center to top left for drawing
         position = position.add(centerX - texture.getWidth()/2, centerY - texture.getHeight()/2, 0);
-    }
-
-    /**
-     * Colorize the snowflake texture
-     */
-    private void UpdateTexture() {
-        //Colorize
-        int alpha = (int)(Math.random() * 256);
-        Color tint = new Color(142, 230, 255, alpha);
-        Utility.colorize(texture, tint);
-        //Depth
-        Utility.fade(texture, 1 - position.getZ()); //0 is far away, 1 is close
     }
 
     /**
@@ -87,8 +79,10 @@ public class Snowflake {
         double angleDelta = Utility.lerp(-MAX_ANGLE_DELTA, MAX_ANGLE_DELTA, Math.random());
         driftAngle += angleDelta;
         //Convert angle to Vector
-        xDrift = DRIFT_SPEED * Math.cos(driftAngle);
-        yDrift = DRIFT_SPEED * Math.sin(driftAngle);
+        xDrift = DRIFT_SPEED * strengthMultiplier * Math.cos(driftAngle);
+        yDrift = DRIFT_SPEED * strengthMultiplier * Math.sin(driftAngle);
+        //Reduce Strength Multiplier
+        strengthMultiplier = Utility.clamp(0, MAX_MULTIPLIER, strengthMultiplier - RETURN_RATE);
     }
 
     /**
@@ -116,6 +110,14 @@ public class Snowflake {
         Point3D delta = new Point3D(xDrift, FALL_SPEED + yDrift, 0);
         delta = delta.multiply(parallax * DisplayCanvas.FRAME_DELTA_TIME);
         position = position.add(delta);
+        return position;
+    }
+
+    /**
+     * Location accessor
+     * @return Snowflake Location
+     */
+    public Point3D getPosition() {
         return position;
     }
 
@@ -149,5 +151,27 @@ public class Snowflake {
      */
     public void paint(Graphics g) {
         g.drawImage(texture, (int)position.getX(), (int)position.getY(), null);
+    }
+
+    /**
+     * Allow the manual adjustment of the drift angle
+     * @param driftAngle (radians)
+     * @param driftMultiplier strength of gust relative to base currents
+     */
+    public void gust(double driftAngle, double strengthMultiplier) {
+        this.driftAngle = driftAngle;
+        this.strengthMultiplier = strengthMultiplier;
+    }
+
+    /**
+     * Colorize the snowflake texture
+     */
+    private void updateTexture() {
+        //Colorize
+        int alpha = (int)(Math.random() * 256);
+        Color tint = new Color(142, 230, 255, alpha);
+        Utility.colorize(texture, tint);
+        //Depth
+        Utility.fade(texture, 1 - position.getZ()); //0 is far away, 1 is close
     }
 }

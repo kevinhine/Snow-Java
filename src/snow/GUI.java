@@ -23,8 +23,8 @@ public class GUI {
     private JFrame mainWindow;
     private JPanel topPanel;
 
-    private JLabel minLabel,
-                   maxLabel;
+    private JLabel minLabel;
+    private JLabel maxLabel;
     private JSlider snowfallSlider;
     private DisplayCanvas canvas;
 
@@ -122,6 +122,15 @@ public class GUI {
         }
 
         /**
+         * Callback for canvas exits
+         * @param e
+         */
+        @Override
+        public void mouseExited(MouseEvent e) {
+            previousPos = null;
+        }
+
+        /**
          * Callback for mouse movement
          * that breaks snowflakes
          * @param e event context
@@ -134,7 +143,7 @@ public class GUI {
             }
             //Check snowflakes in line between previous and current
             Point currentPos = e.getPoint();
-            //canvas.gust(previousPos, currentPos);
+            canvas.gust(previousPos, currentPos);
             //Update Position
             previousPos = e.getPoint();
         }

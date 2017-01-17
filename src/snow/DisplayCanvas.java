@@ -2,6 +2,7 @@ package snow;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import javafx.geometry.Point3D;
 import javax.swing.*;
@@ -19,6 +20,11 @@ public class DisplayCanvas extends JPanel{
     public static final double FRAME_DELTA_TIME = 1.0 / FRAME_RATE; //frame frequency in seconds per frame
 
     private static final int MAX_SPAWN_DELAY = FRAME_RATE * 5, MIN_SPAWN_DELAY = FRAME_RATE / 2;
+
+    private static final double MIN_GUST_STRENGTH = 1;
+    private static final double MAX_GUST_STRENGTH = 10;
+
+    private static final double GUST_MARGIN = 6;
 
     private final Dimension preferredSize;
 
@@ -77,13 +83,34 @@ public class DisplayCanvas extends JPanel{
     }
 
     /**
+     * Push snowflakes Around
+     * @param start beginning of the wind current
+     * @param finish end of the wind current
+     */
+    public void gust(Point start, Point finish) {
+        double strength = Utility.clamp(MIN_GUST_STRENGTH, MAX_GUST_STRENGTH, start.distance(finish));
+        Line2D windCurrent = new Line2D.Double(start, finish);
+        //Affect Snowflakes nearby the mouse
+        for(Snowflake s : snowflakes) {
+            Point3D position = s.getPosition();
+            if(windCurrent.ptSegDist(position.getX(), position.getY()) <= GUST_MARGIN * strength) {
+                //Calculate wind direction
+                double opposite = finish.getY() - start.getY();
+                double adjacent = finish.getX() - start.getX();
+                double windAngle = Math.atan2(opposite, adjacent);
+                s.gust(windAngle, strength);
+            }
+        }
+    }
+
+    /**
      * Avoid Overloadable calls in the constructor
      */
     private void initialize() {
         setBackground(Color.BLACK);
         this.addComponentListener(new resizeListener());
     }
-    
+
     /**
      * Render Snowflakes
      * @param g graphics context

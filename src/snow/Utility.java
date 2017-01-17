@@ -10,28 +10,6 @@ import java.awt.image.*;
 public class Utility {
 
     /**
-     * Linearly interpolate between a and b by percent
-     * @param a
-     * @param b
-     * @param percent bounded 0,1
-     * @return interpolation
-     */
-    public static double lerp(double a, double b, double percent) {
-        return a * (1 - percent) + b * percent;
-    }
-
-    /**
-     * Linearly interpolate between a and b by percent
-     * @param a
-     * @param b
-     * @param percent bounded 0,1
-     * @return interpolation
-     */
-    public static int lerp(int a, int b, double percent) {
-        return (int)lerp((double)a, (double)b, percent);
-    }
-
-    /**
      * Overlay the second RGB color over the first
      * @param c1
      * @param c2
@@ -61,6 +39,17 @@ public class Utility {
         blend |= blue;
 
         return blend;
+    }
+
+    /**
+     * Clamp the value within the range min, max (inclusive)
+     * @param min
+     * @param max
+     * @param val
+     * @return clamped value
+     */
+    public static double clamp(double min, double max, double val) {
+        return val < min ? min : val > max ? max : val;
     }
 
     /**
@@ -106,5 +95,27 @@ public class Utility {
                 //System.out.println(String.format("C:%x", color));
             }
         }
+    }
+
+    /**
+     * Linearly interpolate between a and b by percent
+     * @param a
+     * @param b
+     * @param percent bounded 0,1
+     * @return interpolation
+     */
+    public static double lerp(double a, double b, double percent) {
+        return a * (1 - percent) + b * percent;
+    }
+
+    /**
+     * Linearly interpolate between a and b by percent
+     * @param a
+     * @param b
+     * @param percent bounded 0,1
+     * @return interpolation
+     */
+    public static int lerp(int a, int b, double percent) {
+        return (int)lerp((double)a, (double)b, percent);
     }
 }
