@@ -8,7 +8,7 @@ import javafx.geometry.Point3D;
 import javax.swing.*;
 
 /**
- *
+ * Panel for rendering
  * @author Kevin
  */
 public class DisplayCanvas extends JPanel{

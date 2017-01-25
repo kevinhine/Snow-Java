@@ -104,6 +104,20 @@ public class Utility {
      * @param percent bounded 0,1
      * @return interpolation
      */
+    /*
+    public static <T extends Number> T lerp(T a, T b, double percent) {
+        //Gives error double cannot be converted to T where is a type-variable
+        //T extends Number
+        return (T)(a.doubleValue() * (1- percent) + b.doubleValue() * percent);
+    }
+
+    /**
+     * Linearly interpolate between a and b by percent
+     * @param a
+     * @param b
+     * @param percent bounded 0,1
+     * @return interpolation
+     */
     public static double lerp(double a, double b, double percent) {
         return a * (1 - percent) + b * percent;
     }
