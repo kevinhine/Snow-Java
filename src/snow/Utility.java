@@ -104,7 +104,6 @@ public class Utility {
      * @param percent bounded 0,1
      * @return interpolation
      */
-    /*
     public static <T extends Number> T lerp(T a, T b, double percent) {
         //Gives error double cannot be converted to T where is a type-variable
         //T extends Number
