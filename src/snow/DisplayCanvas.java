@@ -9,9 +9,11 @@ import javax.swing.*;
 
 /**
  * Panel for rendering
+ *
  * @author Kevin
  */
-public class DisplayCanvas extends JPanel{
+public class DisplayCanvas extends JPanel {
+
     private static final int BORDER = 15;
     private static final double EPSILON = 0.000001;
 
@@ -32,15 +34,19 @@ public class DisplayCanvas extends JPanel{
     private final Timer snowTickTimer;
 
     private double snowfallPercent = 0;
-    private final ArrayList<Snowflake> snowflakes = new ArrayList<>();
+    private final ArrayList<Snowflake> snowflakes = new ArrayList<>(); //Switch to a pool
 
     /**
      * Create a Display Canvas
+     *
      * @param d optimal canvas size
      */
     public DisplayCanvas(Dimension d) {
         preferredSize = d;
-        snowTickTimer = new Timer(FRAME_DELAY, ae -> {snowTick(); repaint();} );
+        snowTickTimer = new Timer(FRAME_DELAY, ae -> {
+            snowTick();
+            repaint();
+        });
         snowSpawnTimer = new Timer(FRAME_DELAY, ae -> spawnSnowflake());
         snowTickTimer.start();
         initialize();
@@ -48,15 +54,15 @@ public class DisplayCanvas extends JPanel{
 
     /**
      * Update snow spawn rate
+     *
      * @param snowfallPercent ratio of maximum snowfall
      */
     public void adjustSnowfall(double snowfallPercent) {
         this.snowfallPercent = snowfallPercent;
         //Disable Timer when near off
-        if(snowfallPercent < EPSILON) {
+        if (snowfallPercent < EPSILON) {
             snowSpawnTimer.stop();
-        }
-        else if(!snowSpawnTimer.isRunning()) {
+        } else if (!snowSpawnTimer.isRunning()) {
             snowSpawnTimer.start();
         }
         calculateSnowSpawnrate();
@@ -70,11 +76,12 @@ public class DisplayCanvas extends JPanel{
         double delay = Utility.lerp(MAX_SPAWN_DELAY, MIN_SPAWN_DELAY, snowfallPercent);
         //Adjust based on snowfall density
         delay *= preferredSize.getWidth() / getWidth();
-        snowSpawnTimer.setDelay((int)delay);
+        snowSpawnTimer.setDelay((int) delay);
     }
 
     /**
      * Set Optimal Dimensions
+     *
      * @return Preferred canvas size
      */
     @Override
@@ -84,6 +91,7 @@ public class DisplayCanvas extends JPanel{
 
     /**
      * Push snowflakes Around
+     *
      * @param start beginning of the wind current
      * @param finish end of the wind current
      */
@@ -91,9 +99,9 @@ public class DisplayCanvas extends JPanel{
         double strength = Utility.clamp(MIN_GUST_STRENGTH, MAX_GUST_STRENGTH, start.distance(finish));
         Line2D windCurrent = new Line2D.Double(start, finish);
         //Affect Snowflakes nearby the mouse
-        for(Snowflake s : snowflakes) {
+        for (Snowflake s : snowflakes) {
             Point3D position = s.getPosition();
-            if(windCurrent.ptSegDist(position.getX(), position.getY()) <= GUST_MARGIN * strength) {
+            if (windCurrent.ptSegDist(position.getX(), position.getY()) <= GUST_MARGIN * strength) {
                 //Calculate wind direction
                 double opposite = finish.getY() - start.getY();
                 double adjacent = finish.getX() - start.getX();
@@ -113,13 +121,14 @@ public class DisplayCanvas extends JPanel{
 
     /**
      * Render Snowflakes
+     *
      * @param g graphics context
      */
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if(snowflakes != null) {
-            for(Snowflake s : snowflakes) {
+        if (snowflakes != null) {
+            for (Snowflake s : snowflakes) {
                 s.paint(g);
             }
         }
@@ -133,10 +142,10 @@ public class DisplayCanvas extends JPanel{
      * Update the snowflake positions
      */
     private void snowTick() {
-        for(int i = snowflakes.size() - 1; i >= 0; i--) {
+        for (int i = snowflakes.size() - 1; i >= 0; i--) {
             Snowflake s = snowflakes.get(i);
             Point3D pos = s.fall();
-            if(pos.getY() > getHeight() || pos.getX() < -BORDER || pos.getX() > getWidth() + BORDER) {
+            if (pos.getY() > getHeight() || pos.getX() < -BORDER || pos.getX() > getWidth() + BORDER) {
                 snowflakes.remove(s);
             }
         }
@@ -144,6 +153,7 @@ public class DisplayCanvas extends JPanel{
 
     /**
      * Instantiate a snowflake
+     *
      * @param xPos
      * @param yPos
      */
@@ -153,6 +163,7 @@ public class DisplayCanvas extends JPanel{
 
     /**
      * Instantiate a snowflake
+     *
      * @param pos snowflake spawn position
      */
     public void spawnSnowflake(Point pos) {
@@ -170,9 +181,10 @@ public class DisplayCanvas extends JPanel{
      * Allow the canvas to respond to resize events
      */
     class resizeListener extends ComponentAdapter {
+
         @Override
         public void componentResized(ComponentEvent e) {
-                calculateSnowSpawnrate();
+            calculateSnowSpawnrate();
         }
     }
 }

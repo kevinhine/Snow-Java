@@ -7,9 +7,11 @@ import javax.swing.event.*;
 
 /**
  * GUI that sets up the Window
+ *
  * @author Kevin
  */
 public class GUI {
+
     private static final int SIZE = 500;
 
     private static final int MIN_SNOWFALL = 0;
@@ -30,6 +32,7 @@ public class GUI {
 
     /**
      * Create the GUI
+     *
      * @param args command line arguments
      */
     public GUI(String[] args) {
@@ -39,6 +42,7 @@ public class GUI {
 
     /**
      * Create Window Layout
+     *
      * @param width Canvas horizontal dimension
      * @param height Canvas vertical dimension
      */
@@ -73,7 +77,7 @@ public class GUI {
      */
     private void registerListeners() {
         snowfallSlider.addChangeListener((ChangeEvent e) -> {
-            double percent = ((JSlider)e.getSource()).getValue() * RANGE_TO_PERCENT;
+            double percent = ((JSlider) e.getSource()).getValue() * RANGE_TO_PERCENT;
             canvas.adjustSnowfall(percent);
         });
         CanvasMouseListener c = new CanvasMouseListener();
@@ -86,6 +90,7 @@ public class GUI {
      * Add mouse functionality to canvas
      */
     class CanvasMouseListener extends MouseInputAdapter {
+
         Timer delayTimer;
         Point previousPos;
         Point spawningPos;
@@ -101,8 +106,8 @@ public class GUI {
         }
 
         /**
-         * Callback for mouse presses
-         * that creates a snowflake
+         * Callback for mouse presses that creates a snowflake
+         *
          * @param e event context
          */
         @Override
@@ -110,10 +115,9 @@ public class GUI {
             canvas.spawnSnowflake(e.getPoint());
         }
 
-
         /**
-         * Callback for mouse drags
-         * that updates last position
+         * Callback for mouse drags that updates last position
+         *
          * @param e
          */
         @Override
@@ -123,6 +127,7 @@ public class GUI {
 
         /**
          * Callback for canvas exits
+         *
          * @param e
          */
         @Override
@@ -131,13 +136,13 @@ public class GUI {
         }
 
         /**
-         * Callback for mouse movement
-         * that breaks snowflakes
+         * Callback for mouse movement that breaks snowflakes
+         *
          * @param e event context
          */
         @Override
         public void mouseMoved(MouseEvent e) {
-            if(previousPos == null) {
+            if (previousPos == null) {
                 previousPos = e.getPoint();
                 return;
             }
@@ -147,9 +152,10 @@ public class GUI {
             //Update Position
             previousPos = e.getPoint();
         }
+
         /**
-         * Callback for mouse presses
-         * that spawns many snowflakes
+         * Callback for mouse presses that spawns many snowflakes
+         *
          * @param e event context
          */
         @Override
@@ -157,9 +163,10 @@ public class GUI {
             spawningPos = e.getPoint();
             delayTimer.start();
         }
+
         /**
-         * Callback for mouse releases
-         * that stops the spawning of snowflakes
+         * Callback for mouse releases that stops the spawning of snowflakes
+         *
          * @param e
          */
         @Override

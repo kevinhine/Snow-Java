@@ -10,12 +10,13 @@ import javax.imageio.ImageIO;
 /*
  * Snowflakes are not being destroyed correctly
  */
-
 /**
  * Snowflake that gently wafts and falls
+ *
  * @author Kevin Hine
  */
 public class Snowflake {
+
     private static final double FALL_SPEED = 100;
 
     private static final double DRIFT_SPEED = FALL_SPEED / 4;
@@ -30,12 +31,11 @@ public class Snowflake {
     private static final int NUM_SNOWFLAKE_TYPES;
 
     /**
-     * Calculate the number of snowflake textures
-     * (must be sequential)
+     * Calculate the number of snowflake textures (must be sequential)
      */
     static {
         int index = 0;
-        while(Snowflake.class.getResource("resources/snowflake" + index + ".png") != null) {
+        while (Snowflake.class.getResource("resources/snowflake" + index + ".png") != null) {
             index++;
         }
         NUM_SNOWFLAKE_TYPES = index;
@@ -46,9 +46,8 @@ public class Snowflake {
     private double strengthMultiplier = 1;
 
     /**
-     * Snowflake position
-     * x,y are screen coordinates
-     * z is draw depth (higher values are displayed on top)
+     * Snowflake position x,y are screen coordinates z is draw depth (higher
+     * values are displayed on top)
      */
     private Point3D position;
     private BufferedImage texture;
@@ -57,9 +56,9 @@ public class Snowflake {
 
     //Scale based on depth?
 //    private static final int MAX_SIZE = 20;
-
     /**
      * Create a snowflake
+     *
      * @param centerX
      * @param centerY
      */
@@ -69,7 +68,7 @@ public class Snowflake {
         loadTexture();
         updateTexture();
         //Convert from center to top left for drawing
-        position = position.add(centerX - texture.getWidth()/2, centerY - texture.getHeight()/2, 0);
+        position = position.add(centerX - texture.getWidth() / 2, centerY - texture.getHeight() / 2, 0);
     }
 
     /**
@@ -82,18 +81,19 @@ public class Snowflake {
         xDrift = DRIFT_SPEED * strengthMultiplier * Math.cos(driftAngle);
         yDrift = DRIFT_SPEED * strengthMultiplier * Math.sin(driftAngle);
         //Reduce Strength Multiplier
-        strengthMultiplier = Utility.clamp(0, MAX_MULTIPLIER, strengthMultiplier - RETURN_RATE);
+        strengthMultiplier = Utility.clamp(1, MAX_MULTIPLIER, strengthMultiplier - RETURN_RATE);
     }
 
     /**
      * Default comparison
+     *
      * @param o object to be compared
      * @return true if the objects are equivalent
      */
     @Override
     public boolean equals(Object o) {
-        if(o instanceof Snowflake) {
-            Snowflake obj = (Snowflake)o;
+        if (o instanceof Snowflake) {
+            Snowflake obj = (Snowflake) o;
             return position == obj.position;
         }
         return false;
@@ -101,6 +101,7 @@ public class Snowflake {
 
     /**
      * Cause the snowflake to fall to the ground
+     *
      * @return snowflake location
      */
     public Point3D fall() {
@@ -115,6 +116,7 @@ public class Snowflake {
 
     /**
      * Location accessor
+     *
      * @return Snowflake Location
      */
     public Point3D getPosition() {
@@ -123,6 +125,7 @@ public class Snowflake {
 
     /**
      * Default hash
+     *
      * @return hash
      */
     @Override
@@ -137,24 +140,26 @@ public class Snowflake {
      * Choose a snowflake texture
      */
     private void loadTexture() {
-        int index = (int)(Math.random() * NUM_SNOWFLAKE_TYPES);
+        int index = (int) (Math.random() * NUM_SNOWFLAKE_TYPES);
         try {
             texture = ImageIO.read(getClass().getResource("resources/snowflake" + index + ".png"));
-        } catch(IOException e) {
+        } catch (IOException e) {
             System.err.println(e); //Should not throw any errors as files are initially checked
         }
     }
 
     /**
      * Render the Snowflake
+     *
      * @param g
      */
     public void paint(Graphics g) {
-        g.drawImage(texture, (int)position.getX(), (int)position.getY(), null);
+        g.drawImage(texture, (int) position.getX(), (int) position.getY(), null);
     }
 
     /**
      * Allow the manual adjustment of the drift angle
+     *
      * @param driftAngle (radians)
      * @param driftMultiplier strength of gust relative to base currents
      */
@@ -168,7 +173,7 @@ public class Snowflake {
      */
     private void updateTexture() {
         //Colorize
-        int alpha = (int)(Math.random() * 256);
+        int alpha = (int) (Math.random() * 256);
         Color tint = new Color(142, 230, 255, alpha);
         Utility.colorize(texture, tint);
         //Depth
