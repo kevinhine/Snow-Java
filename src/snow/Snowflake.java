@@ -2,7 +2,7 @@ package snow;
 
 import java.awt.*;
 import java.awt.image.*;
-import java.io.*;
+import java.util.ArrayList;
 import java.util.Objects;
 import javafx.geometry.Point3D;
 import javax.imageio.ImageIO;
@@ -28,17 +28,23 @@ public class Snowflake {
     private static final double MAX_MULTIPLIER = 2;
     private static final double RETURN_RATE = 0.01;
 
-    private static final int NUM_SNOWFLAKE_TYPES;
+    private static final BufferedImage[] TEXTURES;
+    private static final Color TINT = new Color(142, 230, 255);
 
     /**
-     * Calculate the number of snowflake textures (must be sequential)
+     * Preload Textures
      */
     static {
-        int index = 0;
-        while (Snowflake.class.getResource("resources/snowflake" + index + ".png") != null) {
-            index++;
+        ArrayList<BufferedImage> temp = new ArrayList<>();
+        for (int i = 0; true; i++) {
+            try {
+                System.out.println(i);
+                temp.add(ImageIO.read(Snowflake.class.getResource("resources/snowflake" + i + ".png")));
+            } catch (Exception e) {
+                break; //Stop reading when Run out of Files
+            }
         }
-        NUM_SNOWFLAKE_TYPES = index;
+        TEXTURES = temp.toArray(new BufferedImage[0]);
     }
 
     //Used as a Vector that affects the Falling Trajectory
@@ -50,7 +56,10 @@ public class Snowflake {
      * values are displayed on top)
      */
     private Point3D position;
-    private BufferedImage texture;
+
+    private int index;
+    private double tintRatio;
+
     private double xDrift;
     private double yDrift;
 
@@ -65,10 +74,12 @@ public class Snowflake {
     public Snowflake(double centerX, double centerY) {
         //Calculate Depth with placeholder x,y
         position = new Point3D(0, 0, Math.random());
-        loadTexture();
-        updateTexture();
-        //Convert from center to top left for drawing
-        position = position.add(centerX - texture.getWidth() / 2, centerY - texture.getHeight() / 2, 0);
+
+        index = (int) (Math.random() * TEXTURES.length);
+        tintRatio = Utility.lerp(0.25, 1, Math.random());
+
+        //Convert from center to top left for drawing, Depth is randomized
+        position = new Point3D(centerX - TEXTURES[index].getWidth() / 2, centerY - TEXTURES[index].getHeight() / 2, Math.random());
     }
 
     /**
@@ -131,21 +142,9 @@ public class Snowflake {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 37 * hash + Objects.hashCode(this.position);
-        hash = 37 * hash + Objects.hashCode(this.texture);
+        hash = 37 * hash + Objects.hashCode(position);
+        hash = 37 * hash + Objects.hashCode(index);
         return hash;
-    }
-
-    /**
-     * Choose a snowflake texture
-     */
-    private void loadTexture() {
-        int index = (int) (Math.random() * NUM_SNOWFLAKE_TYPES);
-        try {
-            texture = ImageIO.read(getClass().getResource("resources/snowflake" + index + ".png"));
-        } catch (IOException e) {
-            System.err.println(e); //Should not throw any errors as files are initially checked
-        }
     }
 
     /**
@@ -154,29 +153,34 @@ public class Snowflake {
      * @param g
      */
     public void paint(Graphics g) {
-        g.drawImage(texture, (int) position.getX(), (int) position.getY(), null);
+        BufferedImage buffer = new BufferedImage(TEXTURES[index].getWidth(), TEXTURES[index].getHeight(), TEXTURES[index].getType());
+        Graphics2D g2dBuffer = buffer.createGraphics();
+
+        //Mask
+        g2dBuffer.drawImage(TEXTURES[index], 0, 0, null);
+
+        //Tint
+        g2dBuffer.setColor(TINT);
+        g2dBuffer.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, (float) tintRatio));
+        g2dBuffer.fillRect(0, 0, TEXTURES[index].getWidth(), TEXTURES[index].getHeight());
+
+        g2dBuffer.dispose();
+
+        //Z Depth Fade
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, (float) position.getZ()));
+
+        g.drawImage(buffer, (int) position.getX(), (int) position.getY(), null);
     }
 
     /**
      * Allow the manual adjustment of the drift angle
      *
      * @param driftAngle (radians)
-     * @param driftMultiplier strength of gust relative to base currents
+     * @param strengthMultiplier strength of gust relative to base currents
      */
     public void gust(double driftAngle, double strengthMultiplier) {
         this.driftAngle = driftAngle;
         this.strengthMultiplier = strengthMultiplier;
-    }
-
-    /**
-     * Colorize the snowflake texture
-     */
-    private void updateTexture() {
-        //Colorize
-        int alpha = (int) (Math.random() * 256);
-        Color tint = new Color(142, 230, 255, alpha);
-        Utility.colorize(texture, tint);
-        //Depth
-        Utility.fade(texture, 1 - position.getZ()); //0 is far away, 1 is close
     }
 }
