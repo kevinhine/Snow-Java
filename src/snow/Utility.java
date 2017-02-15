@@ -31,6 +31,10 @@ public class Utility {
         return a * (1 - percent) + b * percent;
     }
 
+    public static float lerp(float a, float b, double percent) {
+        return (float) lerp((double) a, (double) b, percent);
+    }
+
     public static int lerp(int a, int b, double percent) {
         return (int) lerp((double) a, (double) b, percent);
     }
