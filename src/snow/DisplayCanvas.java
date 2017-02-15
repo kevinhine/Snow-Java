@@ -174,7 +174,7 @@ public class DisplayCanvas extends JPanel {
      * Instantiate a snowflake at the top of the screen
      */
     public void spawnSnowflake() {
-        spawnSnowflake(Math.random() * getWidth() + 1, - 20);
+        spawnSnowflake(Math.random() * getWidth() + 1, - BORDER);
     }
 
     /**
