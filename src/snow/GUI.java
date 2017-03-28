@@ -12,10 +12,7 @@ import javax.swing.event.*;
  */
 public class GUI {
 
-    private static final int SIZE = 500;
-
-    private static final int MIN_SNOWFALL = 0;
-    private static final int MAX_SNOWFALL = 100;
+    private static final Dimension SIZE = new Dimension(500, 500);
 
     private static final int HOLD_DELAY = 500;
     private static final int SPAWN_DELAY = 60;
@@ -36,17 +33,16 @@ public class GUI {
      * @param args command line arguments
      */
     public GUI(String[] args) {
-        initializeWindow(SIZE, SIZE);
+        initializeWindow(SIZE);
         registerListeners();
     }
 
     /**
      * Create Window Layout
      *
-     * @param width Canvas horizontal dimension
-     * @param height Canvas vertical dimension
+     * @param d Canvas dimension
      */
-    private void initializeWindow(int width, int height) {
+    private void initializeWindow(Dimension d) {
         //Instantiation
         mainWindow = new JFrame("Snow");
         mainWindow.setVisible(true);
@@ -56,9 +52,10 @@ public class GUI {
         minLabel = new JLabel("Silent Night");
         maxLabel = new JLabel("Let it Snow");
 
-        snowfallSlider = new JSlider(MIN_SNOWFALL, MAX_SNOWFALL, SwingConstants.HORIZONTAL);
+        snowfallSlider = new JSlider();
+        snowfallSlider.setValue(0);
 
-        canvas = new DisplayCanvas(new Dimension(width, height));
+        canvas = new DisplayCanvas(d);
 
         //Composition
         topPanel.add(minLabel);
