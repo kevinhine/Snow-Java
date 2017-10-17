@@ -1,10 +1,3 @@
-/**
- * TODO:
- * rotation
- * scaling
- * noise
- * snowflake generation (maybe using the noise generator iteratively?)
- */
 package snow;
 
 import javax.swing.SwingUtilities;

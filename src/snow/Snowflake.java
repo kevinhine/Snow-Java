@@ -1,15 +1,13 @@
 package snow;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.util.ArrayList;
 import java.util.Objects;
 import javafx.geometry.Point3D;
 import javax.imageio.ImageIO;
 
-/*
- * Snowflakes are not being destroyed correctly
- */
 /**
  * Snowflake that gently wafts and falls
  *
@@ -25,8 +23,12 @@ public class Snowflake {
     private static final double MIN_PARALLAX = 0.4;
     private static final double MAX_PARALLAX = 1;
 
+    private static final double MIN_SCALE = 0.8;
+    private static final double MAX_SCALE = 1.0;
+
+    //Gusts
     private static final double MAX_STRENGTH = 2;
-    private static final double RETURN_RATE = 0.01;
+    private static final double DAMPENING = 0.01;
 
     private static final BufferedImage[] TEXTURES;
     private static final Color HUE = new Color(142, 230, 255);
@@ -40,9 +42,10 @@ public class Snowflake {
         ArrayList<BufferedImage> temp = new ArrayList<>();
         for (int i = 0; true; i++) {
             try {
-                temp.add(ImageIO.read(Snowflake.class.getResource("resources/snowflake" + i + ".png")));
+                temp.add(ImageIO.read(Snowflake.class.getResource(
+                        "resources/snowflake" + i + ".png")));
             } catch (Exception e) {
-                break; //Stop reading when Run out of Files
+                break; //Stop reading when out of Files
             }
         }
         TEXTURES = temp.toArray(new BufferedImage[0]);
@@ -56,13 +59,11 @@ public class Snowflake {
      * Snowflake position x,y are screen coordinates z is draw depth (higher
      * values are displayed on top)
      */
-    private Point3D position;
     private BufferedImage texture;
+    private Point3D position;
     private double xDrift;
     private double yDrift;
 
-    //Scale based on depth?
-//    private static final int MAX_SIZE = 20;
     /**
      * Create a snowflake
      *
@@ -80,13 +81,15 @@ public class Snowflake {
      * Continously update drift vector
      */
     public void drift() {
-        double angleDelta = Utility.lerp(-MAX_ANGLE_DELTA, MAX_ANGLE_DELTA, Math.random());
+        double angleDelta = Utility.lerp(-MAX_ANGLE_DELTA, MAX_ANGLE_DELTA,
+                Math.random());
         driftAngle += angleDelta;
         //Convert angle to Vector
         xDrift = DRIFT_SPEED * strengthMultiplier * Math.cos(driftAngle);
         yDrift = DRIFT_SPEED * strengthMultiplier * Math.sin(driftAngle);
         //Reduce Strength Multiplier
-        strengthMultiplier = Utility.clamp(1, MAX_STRENGTH, strengthMultiplier - RETURN_RATE);
+        strengthMultiplier = Utility.clamp(1, MAX_STRENGTH,
+                strengthMultiplier - DAMPENING);
     }
 
     /**
@@ -113,7 +116,8 @@ public class Snowflake {
         //Update Position
         drift();
         //0 is far away (slower), 1 is close (faster)
-        double parallax = Utility.lerp(MIN_PARALLAX, MAX_PARALLAX, position.getZ());
+        double parallax = Utility.lerp(MIN_PARALLAX, MAX_PARALLAX,
+                position.getZ());
         Point3D delta = new Point3D(xDrift, FALL_SPEED + yDrift, 0);
         delta = delta.multiply(parallax * DisplayCanvas.FRAME_DELTA_TIME);
         position = position.add(delta);
@@ -144,7 +148,8 @@ public class Snowflake {
 
         //Tint
         g2d.setColor(HUE);
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, tintStrength));
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP,
+                tintStrength));
         g2d.fillRect(0, 0, texture.getWidth(), texture.getHeight());
 
         g2d.dispose();
@@ -169,11 +174,24 @@ public class Snowflake {
      * @param g
      */
     public void paint(Graphics g) {
-        //Z Depth Fade
+        //Store Affine Transform
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, (float) position.getZ()));
+        AffineTransform t = g2d.getTransform();
+        //Z Depth Fade
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP,
+                (float) position.getZ()));
+        //Z Depth scale
+        //Move to center of snowflake
+        g2d.translate(position.getX() + texture.getWidth() / 2,
+                position.getY() + texture.getHeight() / 2);
+        //Scale
+        double size = Utility.lerp(MIN_SCALE, MAX_SCALE, position.getZ());
+        g2d.scale(size, size);
 
-        g.drawImage(texture, (int) position.getX(), (int) position.getY(), null);
+        g.drawImage(texture, -texture.getWidth() / 2, -texture.getHeight() / 2, null);
+        //Reset Affine Transform
+        g2d.setTransform(t);
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP));
     }
 
     /**

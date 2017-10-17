@@ -14,8 +14,9 @@ import javax.swing.*;
  */
 public class DisplayCanvas extends JPanel {
 
-    private static final int BORDER = 15;
-    private static final double EPSILON = 0.000001;
+    private static final int BORDER = 15; //Snowflake Size
+
+    private static final double EPSILON = 0.000001; //Arbitrarily Small Number
 
     public static final int FRAME_RATE = 60; //frames per second
     public static final int FRAME_DELAY = 1000 / FRAME_RATE; //frame duration in ms
@@ -101,7 +102,7 @@ public class DisplayCanvas extends JPanel {
         //Affect Snowflakes nearby the mouse
         for (Snowflake s : snowflakes) {
             Point3D position = s.getPosition();
-            if (windCurrent.ptSegDist(position.getX(), position.getY()) <= GUST_MARGIN * strength) {
+            if (windCurrent.ptSegDist(position.getX(), position.getY()) < GUST_MARGIN * strength) {
                 //Calculate wind direction
                 double opposite = finish.getY() - start.getY();
                 double adjacent = finish.getX() - start.getX();
@@ -145,7 +146,9 @@ public class DisplayCanvas extends JPanel {
         for (int i = snowflakes.size() - 1; i >= 0; i--) {
             Snowflake s = snowflakes.get(i);
             Point3D pos = s.fall();
-            if (pos.getY() > getHeight() || pos.getX() < -BORDER || pos.getX() > getWidth() + BORDER) {
+            //remove snowflakes that fall offscreen
+            if (pos.getY() > getHeight() || pos.getX() < -BORDER
+                    || pos.getX() > getWidth() + BORDER) {
                 snowflakes.remove(s);
             }
         }
@@ -174,7 +177,7 @@ public class DisplayCanvas extends JPanel {
      * Instantiate a snowflake at the top of the screen
      */
     public void spawnSnowflake() {
-        spawnSnowflake(Math.random() * getWidth() + 1, - BORDER);
+        spawnSnowflake(Math.random() * getWidth(), -BORDER);
     }
 
     /**

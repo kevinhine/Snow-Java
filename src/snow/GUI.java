@@ -33,16 +33,14 @@ public class GUI {
      * @param args command line arguments
      */
     public GUI(String[] args) {
-        initializeWindow(SIZE);
+        initializeWindow();
         registerListeners();
     }
 
     /**
      * Create Window Layout
-     *
-     * @param d Canvas dimension
      */
-    private void initializeWindow(Dimension d) {
+    private void initializeWindow() {
         //Instantiation
         mainWindow = new JFrame("Snow");
         mainWindow.setVisible(true);
@@ -55,7 +53,7 @@ public class GUI {
         snowfallSlider = new JSlider();
         snowfallSlider.setValue(0);
 
-        canvas = new DisplayCanvas(d);
+        canvas = new DisplayCanvas(SIZE);
 
         //Composition
         topPanel.add(minLabel);
@@ -170,6 +168,7 @@ public class GUI {
         public void mouseReleased(MouseEvent e) {
             delayTimer.stop();
             spawningTimer.stop();
+            previousPos = e.getPoint();
         }
     }
 }
